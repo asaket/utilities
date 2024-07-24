@@ -1,2 +1,2 @@
-# utilities
-Handy yamls
+# Utilities
+Handy YAMLs
