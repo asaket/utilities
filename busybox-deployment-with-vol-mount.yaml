@@ -1,0 +1,35 @@
+# This is a busybox deployment yaml to deploy busybox application and mount below volumn configuration,
+# PV = "etcd-backup"
+# PVC = "etcd-backup"
+# mountPath = "/etcd-backup
+# 
+# After deploying this application, can enter the pod to check the volume mounts
+# oc get nodes
+# oc debug node/<node>
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["sleep", "3600"]
+        volumeMounts:
+          - name: etcd-backup
+            mountPath: /etcd-backup
+      volumes:
+        - name: etcd-backup
+          persistentVolumeClaim:
+            claimName: etcd-backup
