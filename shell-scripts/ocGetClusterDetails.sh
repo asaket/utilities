@@ -22,4 +22,4 @@ oc get network/cluster -o yaml
 
 # get resource quotas
 echo "\n[Resource Quotas] =====>"
-oc get resourcequotas -A -o json | jq -r '.items[] | [.metadata.namespace, .spec.hard.cpu] | @csv'
+oc get resourcequotas -A -o json | jq -r '(["Namespace","CPU Limit (spec.hard)","CPU Limit (status.used)"] | @csv), (.items[] | [.metadata.namespace, .spec.hard["limits.cpu"], .status.used["limits.cpu"]] | @csv)'
