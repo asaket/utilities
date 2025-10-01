@@ -1,0 +1,71 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ubi8-app-info
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ubi8-app-info
+  template:
+    metadata:
+      labels:
+        app: ubi8-app-info
+    spec:
+      containers:
+        - resources:
+            limits:
+              cpu: 100m
+            requests:
+              cpu: 50m
+          terminationMessagePath: /dev/termination-log
+          name: ubi8-container-info
+          command:
+            - /bin/sh
+            - '-c'
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: CLUSTER_NAME
+              value: your-cluster-name
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          terminationMessagePolicy: File
+          image: 'registry.access.redhat.com/ubi8/python-38:latest'
+          args:
+            - |
+              echo "Starting simple web server..."
+              cat > /tmp/index.html <<EOF
+              <html>
+              <body>
+              <h1>Welcome to UBI8 App!</h1>
+              <p>Cluster Name: $CLUSTER_NAME</p>
+              <p>Namespace: $POD_NAMESPACE</p>
+              <p>Pod IP: $POD_IP</p>
+              </body>
+              </html>
+              EOF
+              python3 -m http.server 8080 -d /tmp
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubi8-app-service
+spec:
+  selector:
+    app: ubi8-app-info
+  ports:
+  - port: 8080
+    targetPort: 8080
+  
